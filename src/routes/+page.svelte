@@ -18,6 +18,12 @@
 	import Chatbar from '$lib/components/chatbar/Chatbar.svelte';
 	import Promptbar from '$lib/components/promptbar/Promptbar.svelte';
 	import Chat from '$lib/components/chat/Chat.svelte';
+	import type { PageData } from './$types';
+	import { models } from '$lib/stores/models';
+
+	export let data: PageData;
+
+	models.set(data.models);
 
 	onMount(() => {
 		let settings: Settings = {

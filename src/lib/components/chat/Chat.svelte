@@ -10,12 +10,10 @@
 	import Icon from '@iconify/svelte';
 	import ChatInput from './ChatInput.svelte';
 	import type { Message } from '$lib/types/chat';
-	import type { Plugin } from '$lib/types/plugin';
 	import { throttle } from '$lib/data/throttle';
 	import { onMount } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import { handleSend } from '$lib/handlers/handleSend';
-	import type { OpenAIModel } from '$lib/types/openai';
 	import type { ErrorMessage as ErrorMessageType } from '$lib/types/error';
 	import ErrorMessage from './ErrorMessage.svelte';
 
@@ -81,6 +79,7 @@
 	let modelError: ErrorMessageType | undefined;
 
 	onMount(() => {
+		/*
 		(async () => {
 			isModelsLoading = true;
 			const resp = await fetch('/api/models');
@@ -97,6 +96,7 @@
 			models.set(data as OpenAIModel[]);
 			isModelsLoading = false;
 		})();
+		*/
 
 		const observer = new IntersectionObserver(
 			([entry]) => {

@@ -7,7 +7,7 @@ import {
 } from '$env/static/private';
 import { OpenAIModels, OpenAIModelID, type OpenAIModel } from '$lib/types/openai';
 
-export async function GET() {
+export async function getModels() {
 	let url = `${OPENAI_API_HOST}/v1/models`;
 	if (OPENAI_API_TYPE === 'azure') {
 		url = `${OPENAI_API_HOST}/openai/deployments?api-version=${OPENAI_API_VERSION}`;
@@ -31,15 +31,12 @@ export async function GET() {
 
 	if (response.status === 401) {
 		console.error('OpenAI API key is invalid', response.headers);
-		return new Response(JSON.stringify({ message: 'OpenAI API key is invalid' }), { status: 401 });
+		throw JSON.stringify({ message: 'OpenAI API key is invalid' });
 	} else if (response.status !== 200) {
 		console.error(`OpenAI API returned an error ${response.status}: ${await response.text()}`);
-		return new Response(
-			JSON.stringify({
-				message: `OpenAI API returned an error ${response.status}: ${await response.text()}`
-			}),
-			{ status: 500 }
-		);
+		throw JSON.stringify({
+			message: `OpenAI API returned an error ${response.status}: ${await response.text()}`
+		});
 	}
 
 	const json = await response.json();
@@ -53,5 +50,5 @@ export async function GET() {
 		})
 		.filter(Boolean);
 
-	return new Response(JSON.stringify(models));
+	return models;
 }
