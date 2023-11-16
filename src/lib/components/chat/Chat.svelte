@@ -1,8 +1,7 @@
 <script lang="ts">
-	import ErrorMessage from './ErrorMessage.svelte';
 	import { selectedConversation, stopConversation } from '$lib/stores/conversation';
 	import Spinner from '../spinner/Spinner.svelte';
-	import { modelError, models } from '$lib/stores/models';
+	import { models } from '$lib/stores/models';
 	import ModelSelect from './ModelSelect.svelte';
 	import SystemPrompt from './SystemPrompt.svelte';
 	import ChatLoader from './ChatLoader.svelte';
@@ -16,6 +15,9 @@
 	import { onMount } from 'svelte';
 	import ChatMessage from './ChatMessage.svelte';
 	import { handleSend } from '$lib/handlers/handleSend';
+	import type { OpenAIModel } from '$lib/types/openai';
+	import type { ErrorMessage as ErrorMessageType } from '$lib/types/error';
+	import ErrorMessage from './ErrorMessage.svelte';
 
 	let autoScrollEnabled = true;
 	let showScrollDownButton = false;
@@ -75,7 +77,27 @@
 		}
 	}
 
+	let isModelsLoading = false;
+	let modelError: ErrorMessageType | undefined;
+
 	onMount(() => {
+		(async () => {
+			isModelsLoading = true;
+			const resp = await fetch('/api/models');
+			if (resp.status != 200) {
+				modelError = {
+					title: 'Error fetching models.',
+					code: '' + resp.status || 'unknown',
+					messageLines: resp.statusText ? [resp.statusText] : ['OpenAI may be experiencing issues.']
+				};
+				isModelsLoading = false;
+				return;
+			}
+			const data = await resp.json();
+			models.set(data as OpenAIModel[]);
+			isModelsLoading = false;
+		})();
+
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				autoScrollEnabled = entry.isIntersecting;
@@ -91,7 +113,11 @@
 </script>
 
 <div class="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-	{#if $modelError === undefined}
+	{#if isModelsLoading}
+		<div class="flex items-center justify-center w-full h-full">
+			<Spinner />
+		</div>
+	{:else if modelError === undefined}
 		<div class="max-h-full overflow-x-hidden" bind:this={chatContainerRef} on:scroll={handleScroll}>
 			{#if $selectedConversation?.messages.length === 0}
 				<div
@@ -180,6 +206,6 @@
 			{showScrollDownButton}
 		/>
 	{:else}
-		<ErrorMessage error={$modelError} />
+		<ErrorMessage error={modelError} />
 	{/if}
 </div>

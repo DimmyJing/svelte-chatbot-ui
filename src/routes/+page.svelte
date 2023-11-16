@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { conversations, selectedConversation } from '$lib/stores/conversation';
 	import { folders } from '$lib/stores/folder';
-	import { models, modelError } from '$lib/stores/models';
 	import { prompts } from '$lib/stores/prompt';
 	import { OpenAIModelID, OpenAIModels } from '$lib/types/openai';
 	import { v4 as uuidv4 } from 'uuid';
@@ -19,13 +18,8 @@
 	import Chatbar from '$lib/components/chatbar/Chatbar.svelte';
 	import Promptbar from '$lib/components/promptbar/Promptbar.svelte';
 	import Chat from '$lib/components/chat/Chat.svelte';
-	import type { PageData } from './$types.js';
-
-	export let data: PageData;
 
 	onMount(() => {
-		models.set(data.models);
-
 		let settings: Settings = {
 			theme: 'dark'
 		};
