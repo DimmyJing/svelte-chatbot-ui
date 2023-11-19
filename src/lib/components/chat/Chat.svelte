@@ -157,7 +157,7 @@
 						onEdit={(editedMessage) => {
 							currentMessage = editedMessage;
 							// discard edited message and the ones that come after then resend
-							handleSend(editedMessage, $selectedConversation?.messages.length ?? 0 - index);
+							handleSend(editedMessage, ($selectedConversation?.messages.length ?? 0) - index);
 						}}
 					/>
 				{/each}

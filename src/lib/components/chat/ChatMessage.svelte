@@ -50,12 +50,10 @@
 		const findIndex = messages.findIndex((elm) => elm === message);
 
 		if (findIndex < 0) return;
-
-		if (findIndex < messages.length - 1 && messages[findIndex + 1].role === 'assistant') {
+		if (findIndex < messages.length - 1 && messages[findIndex + 1].role === 'assistant')
 			messages.splice(findIndex, 2);
-		} else {
-			messages.splice(findIndex, 1);
-		}
+		else messages.splice(findIndex, 1);
+
 		const updatedConversation = {
 			...$selectedConversation,
 			messages
@@ -87,8 +85,6 @@
 			}, 2000);
 		});
 	}
-
-	$: messageContent = message.content;
 </script>
 
 <div
