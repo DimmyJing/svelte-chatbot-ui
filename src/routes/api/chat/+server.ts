@@ -115,7 +115,7 @@ export async function POST({ request }) {
 	if (!promptToSend) promptToSend = PUBLIC_DEFAULT_SYSTEM_PROMPT;
 
 	let temperatureToUse = temperature;
-	if (!temperatureToUse) temperatureToUse = PUBLIC_DEFAULT_TEMPERATURE;
+	if (!temperatureToUse) temperatureToUse = +PUBLIC_DEFAULT_TEMPERATURE;
 	temperatureToUse = +temperatureToUse;
 
 	let charCount = promptToSend.length;

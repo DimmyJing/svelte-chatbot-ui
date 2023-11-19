@@ -44,6 +44,7 @@
     "svelte-exmarkdown": "^3.0.1",
     "svelte-french-toast": "^1.2.0",
     "svelte-highlight": "^7.4.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "valibot": "^0.20.1"
   }
 }

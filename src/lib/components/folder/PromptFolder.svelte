@@ -1,17 +1,10 @@
 <script lang="ts">
-	import {
-		handleDeleteFolder,
-		handleUpdateConversation,
-		handleUpdateFolder,
-		handleUpdatePrompt
-	} from '$lib/handlers/handlers';
-	import { conversations } from '$lib/stores/conversation';
 	import type { FolderInterface } from '$lib/types/folder';
 	import Icon from '@iconify/svelte';
-	import Conversation from '../chatbar/components/Conversation.svelte';
 	import { promptSearchTerm } from '$lib/stores/searchTerm';
 	import { prompts } from '$lib/stores/prompt';
 	import PromptComponent from '../promptbar/components/PromptComponent.svelte';
+	import { folders } from '$lib/stores/folder';
 
 	export let currentFolder: FolderInterface;
 
@@ -23,7 +16,12 @@
 	function handleEnterDown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			handleUpdateFolder(currentFolder.id, renameValue);
+			folders.update((folders) =>
+				folders.map((f) => {
+					if (f.id === currentFolder.id) return { ...f, name: renameValue };
+					return f;
+				})
+			);
 			renameValue = '';
 			isRenaming = false;
 		}
@@ -33,13 +31,20 @@
 		if (e.dataTransfer) {
 			isOpen = false;
 			const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
-			handleUpdatePrompt({ ...prompt, folderID: currentFolder.id });
+			prompts.update((prompts) =>
+				prompts.map((p) => (p.id === prompt.id ? { ...prompt, folderID: currentFolder.id } : p))
+			);
 			(e.target as HTMLButtonElement).style.background = 'none';
 		}
 	}
 
 	function handleRename() {
-		handleUpdateFolder(currentFolder.id, renameValue);
+		folders.update((folders) =>
+			folders.map((f) => {
+				if (f.id === currentFolder.id) return { ...f, name: renameValue };
+				return f;
+			})
+		);
 		renameValue = '';
 		isRenaming = false;
 	}
@@ -106,8 +111,15 @@
 				on:click={(e) => {
 					e.stopPropagation();
 
-					if (isDeleting) handleDeleteFolder(currentFolder.id);
-					else if (isRenaming) handleRename();
+					if (isDeleting) {
+						folders.update((folders) => folders.filter((f) => f.id !== currentFolder.id));
+						prompts.update((prompts) =>
+							prompts.map((p) => {
+								if (p.folderID === currentFolder.id) return { ...p, folderID: undefined };
+								return p;
+							})
+						);
+					} else if (isRenaming) handleRename();
 
 					isDeleting = false;
 					isRenaming = false;

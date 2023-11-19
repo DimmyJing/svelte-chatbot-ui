@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { handleDeletePrompt, handleUpdatePrompt } from '$lib/handlers/handlers';
 	import { promptSearchTerm } from '$lib/stores/searchTerm';
 	import type { Prompt } from '$lib/types/prompt';
 	import Icon from '@iconify/svelte';
 	import PromptModal from './PromptModal.svelte';
+	import { prompts } from '$lib/stores/prompt';
 
 	export let prompt: Prompt;
 
@@ -13,7 +13,7 @@
 	let renameValue = '';
 
 	function handleUpdate(prompt: Prompt) {
-		handleUpdatePrompt(prompt);
+		prompts.update((prompts) => prompts.map((p) => (p.id === prompt.id ? prompt : p)));
 		promptSearchTerm.set('');
 	}
 
@@ -27,7 +27,7 @@
 		e.stopPropagation();
 
 		if (isDeleting) {
-			handleDeletePrompt(prompt);
+			prompts.update((prompts) => prompts.filter((p) => p.id !== prompt.id));
 			promptSearchTerm.set('');
 		}
 

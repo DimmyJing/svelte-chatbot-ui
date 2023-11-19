@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { PUBLIC_DEFAULT_TEMPERATURE } from '$env/static/public';
-	import { handleUpdateConversation } from '$lib/handlers/handlers';
 	import { conversations, selectedConversation } from '$lib/stores/conversation';
 
 	let temperature =
@@ -8,9 +7,19 @@
 
 	function handleChange(e: { currentTarget: HTMLInputElement }) {
 		if ($selectedConversation) {
-			handleUpdateConversation($selectedConversation, {
-				key: 'temperature',
-				value: temperature
+			conversations.update((conversations) =>
+				conversations.map((c) =>
+					c.id === $selectedConversation?.id
+						? {
+								...c,
+								temperature
+						  }
+						: c
+				)
+			);
+			selectedConversation.set({
+				...$selectedConversation,
+				temperature
 			});
 		}
 	}

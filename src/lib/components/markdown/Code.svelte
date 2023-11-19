@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { messageIsStreaming } from '$lib/stores/messageIsStreaming';
+	import { messageIsStreaming } from '$lib/stores/loading';
 	import Icon from '@iconify/svelte';
 	import { getContext, onMount } from 'svelte';
 	import { HighlightAuto } from 'svelte-highlight';

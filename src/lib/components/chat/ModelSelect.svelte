@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { PUBLIC_DEFAULT_MODEL } from '$env/static/public';
-	import { handleUpdateConversation } from '$lib/handlers/handlers';
-	import { selectedConversation } from '$lib/stores/conversation';
+	import { conversations, selectedConversation } from '$lib/stores/conversation';
 	import { models } from '$lib/stores/models';
 	import Icon from '@iconify/svelte';
 
 	function handleChange(e: { currentTarget: HTMLSelectElement }) {
 		if ($selectedConversation) {
-			handleUpdateConversation($selectedConversation, {
-				key: 'model',
-				value: $models.find((model) => model.id === e.currentTarget.value)
-			});
+			const model = $models.find((model) => model.id === e.currentTarget.value);
+			if (!model) return;
+			conversations.update((conversations) =>
+				conversations.map((c) => (c.id === $selectedConversation?.id ? { ...c, model } : c))
+			);
+			selectedConversation.set({ ...$selectedConversation, model });
 		}
 	}
 </script>

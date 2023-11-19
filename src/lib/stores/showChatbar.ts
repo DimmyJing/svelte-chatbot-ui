@@ -1,4 +1,5 @@
-import { writable } from 'svelte/store';
+import { storable } from './localStorage';
+import { boolean } from 'valibot';
 
-export const showChatbar = writable(true);
-export const showPromptbar = writable(true);
+export const showChatbar = storable('showChatbar', boolean(), true);
+export const showPromptbar = storable('showPromptbar', boolean(), true);

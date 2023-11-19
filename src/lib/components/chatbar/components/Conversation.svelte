@@ -1,14 +1,16 @@
 <script lang="ts">
 	import {
-		handleDeleteConversation,
-		handleSelectConversation,
-		handleUpdateConversation,
-		handleUpdateFolder
-	} from '$lib/handlers/handlers';
-	import { selectedConversation } from '$lib/stores/conversation';
-	import { messageIsStreaming } from '$lib/stores/messageIsStreaming';
+		PUBLIC_DEFAULT_MODEL,
+		PUBLIC_DEFAULT_SYSTEM_PROMPT,
+		PUBLIC_DEFAULT_TEMPERATURE
+	} from '$env/static/public';
+	import { conversations, selectedConversation } from '$lib/stores/conversation';
+	import { messageIsStreaming } from '$lib/stores/loading';
+	import { searchTerm } from '$lib/stores/searchTerm';
 	import type { Conversation } from '$lib/types/chat';
+	import { OpenAIModelID, OpenAIModels } from '$lib/types/openai';
 	import Icon from '@iconify/svelte';
+	import { v4 as uuidv4 } from 'uuid';
 
 	export let conversation: Conversation;
 
@@ -32,9 +34,19 @@
 
 	function handleRename(conversation: Conversation) {
 		if (renameValue.trim().length > 0) {
-			handleUpdateConversation(conversation, {
-				key: 'name',
-				value: renameValue
+			conversations.update((conversations) =>
+				conversations.map((c) =>
+					c.id === conversation.id
+						? {
+								...c,
+								name: renameValue
+						  }
+						: c
+				)
+			);
+			selectedConversation.set({
+				...conversation,
+				name: renameValue
 			});
 			renameValue = '';
 			isRenaming = false;
@@ -43,8 +55,23 @@
 
 	function handleConfirm(e: MouseEvent) {
 		e.stopPropagation();
-		if (isDeleting) handleDeleteConversation(conversation);
-		else if (isRenaming) handleRename(conversation);
+		if (isDeleting) {
+			conversations.update((conversations) =>
+				conversations.filter((c) => c.id !== conversation.id)
+			);
+			searchTerm.set('');
+			if ($conversations.length > 0)
+				selectedConversation.set($conversations[$conversations.length - 1]);
+			else
+				selectedConversation.set({
+					id: uuidv4(),
+					name: 'New Conversation',
+					messages: [],
+					model: OpenAIModels[PUBLIC_DEFAULT_MODEL as OpenAIModelID],
+					prompt: PUBLIC_DEFAULT_SYSTEM_PROMPT,
+					temperature: +PUBLIC_DEFAULT_TEMPERATURE
+				});
+		} else if (isRenaming) handleRename(conversation);
 		isDeleting = false;
 		isRenaming = false;
 	}
@@ -85,7 +112,7 @@
 			class={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 ${
 				$messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
 			} ${$selectedConversation?.id === conversation.id ? 'bg-[#343541]/90' : ''}`}
-			on:click={() => handleSelectConversation(conversation)}
+			on:click={() => selectedConversation.set(conversation)}
 			disabled={$messageIsStreaming}
 			draggable="true"
 			on:dragstart={handleDragStart}

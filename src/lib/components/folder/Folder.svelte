@@ -1,14 +1,10 @@
 <script lang="ts">
-	import {
-		handleDeleteFolder,
-		handleUpdateConversation,
-		handleUpdateFolder
-	} from '$lib/handlers/handlers';
-	import { conversations } from '$lib/stores/conversation';
+	import { conversations, selectedConversation } from '$lib/stores/conversation';
 	import type { FolderInterface } from '$lib/types/folder';
 	import Icon from '@iconify/svelte';
 	import Conversation from '../chatbar/components/Conversation.svelte';
 	import { searchTerm } from '$lib/stores/searchTerm';
+	import { folders } from '$lib/stores/folder';
 
 	export let currentFolder: FolderInterface;
 
@@ -20,7 +16,12 @@
 	function handleEnterDown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
-			handleUpdateFolder(currentFolder.id, renameValue);
+			folders.update((folders) =>
+				folders.map((f) => {
+					if (f.id === currentFolder.id) return { ...f, name: renameValue };
+					return f;
+				})
+			);
 			renameValue = '';
 			isRenaming = false;
 		}
@@ -30,13 +31,31 @@
 		if (e.dataTransfer) {
 			isOpen = false;
 			const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
-			handleUpdateConversation(conversation, { key: 'folderID', value: currentFolder.id });
+			conversations.update((conversations) =>
+				conversations.map((c) =>
+					c.id === conversation.id
+						? {
+								...c,
+								folderID: currentFolder.id
+						  }
+						: c
+				)
+			);
+			selectedConversation.set({
+				...conversation,
+				folderID: currentFolder.id
+			});
 			(e.target as HTMLButtonElement).style.background = 'none';
 		}
 	}
 
 	function handleRename() {
-		handleUpdateFolder(currentFolder.id, renameValue);
+		folders.update((folders) =>
+			folders.map((f) => {
+				if (f.id === currentFolder.id) return { ...f, name: renameValue };
+				return f;
+			})
+		);
 		renameValue = '';
 		isRenaming = false;
 	}
@@ -105,8 +124,15 @@
 				on:click={(e) => {
 					e.stopPropagation();
 
-					if (isDeleting) handleDeleteFolder(currentFolder.id);
-					else if (isRenaming) handleRename();
+					if (isDeleting) {
+						folders.update((folders) => folders.filter((f) => f.id !== currentFolder.id));
+						conversations.update((conversations) =>
+							conversations.map((c) => {
+								if (c.folderID === currentFolder.id) return { ...c, folderID: undefined };
+								return c;
+							})
+						);
+					} else if (isRenaming) handleRename();
 
 					isDeleting = false;
 					isRenaming = false;

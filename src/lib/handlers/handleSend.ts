@@ -1,6 +1,6 @@
 import { conversations, selectedConversation, stopConversation } from '$lib/stores/conversation';
 import { loading } from '$lib/stores/loading';
-import { messageIsStreaming } from '$lib/stores/messageIsStreaming';
+import { messageIsStreaming } from '$lib/stores/loading';
 import type { ChatBody, Message } from '$lib/types/chat';
 import { PluginID, type Plugin } from '$lib/types/plugin';
 import toast from 'svelte-french-toast';
@@ -86,12 +86,10 @@ export function handleSend(message: Message, discardCount: number, plugin?: Plug
 				selectedConversation.set(localSelectedConversation);
 				loading.set(false);
 			}
-			localStorage.setItem('selectedConversation', JSON.stringify(localSelectedConversation));
 			conversations.update((conversations) => {
 				const index = conversations.findIndex((el) => el.id === localSelectedConversation.id);
 				if (index === -1) conversations.push(localSelectedConversation);
 				else conversations[index] = localSelectedConversation;
-				localStorage.setItem('conversationHistory', JSON.stringify(conversations));
 				return conversations;
 			});
 			messageIsStreaming.set(false);

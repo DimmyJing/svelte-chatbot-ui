@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { selectedConversation } from '$lib/stores/conversation';
-	import { messageIsStreaming } from '$lib/stores/messageIsStreaming';
+	import { messageIsStreaming } from '$lib/stores/loading';
 	import { prompts } from '$lib/stores/prompt';
 	import type { Message } from '$lib/types/chat';
 	import type { Plugin } from '$lib/types/plugin';

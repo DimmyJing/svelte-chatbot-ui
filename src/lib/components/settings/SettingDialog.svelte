@@ -1,17 +1,8 @@
 <script lang="ts">
-	import { lightMode } from '$lib/stores/lightMode';
+	import { settings } from '$lib/stores/settings';
 	import { onMount } from 'svelte';
 
 	export let onClose: () => void;
-
-	function handleSave() {
-		localStorage.setItem(
-			'settings',
-			JSON.stringify({
-				theme: $lightMode
-			})
-		);
-	}
 
 	let modalRef: HTMLDivElement;
 
@@ -53,7 +44,7 @@
 
 				<select
 					class="w-full p-2 bg-transparent cursor-pointer text-neutral-700 dark:text-neutral-200"
-					bind:value={$lightMode}
+					bind:value={$settings.theme}
 				>
 					<option value="dark">Dark mode</option>
 					<option value="light">Light mode</option>
@@ -63,7 +54,6 @@
 					type="button"
 					class="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
 					on:click={() => {
-						handleSave();
 						onClose();
 					}}
 				>

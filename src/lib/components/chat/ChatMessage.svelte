@@ -6,7 +6,7 @@
 	import Table from '../markdown/Table.svelte';
 	import Th from '../markdown/Th.svelte';
 	import Td from '../markdown/Td.svelte';
-	import { messageIsStreaming } from '$lib/stores/messageIsStreaming';
+	import { messageIsStreaming } from '$lib/stores/loading';
 	import Code from '../markdown/Code.svelte';
 	import Pre from '../markdown/Pre.svelte';
 
@@ -65,9 +65,6 @@
 			if (c.id === updatedConversation.id) return updatedConversation;
 			return c;
 		});
-
-		localStorage.setItem('selectedConversation', JSON.stringify(updatedConversation));
-		localStorage.setItem('conversationHistory', JSON.stringify(updatedConversations));
 
 		selectedConversation.set(updatedConversation);
 		conversations.set(updatedConversations);

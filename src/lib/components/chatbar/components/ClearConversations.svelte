@@ -1,11 +1,29 @@
 <script lang="ts">
-	import { handleClearConversations } from '$lib/handlers/handlers';
+	import {
+		PUBLIC_DEFAULT_MODEL,
+		PUBLIC_DEFAULT_SYSTEM_PROMPT,
+		PUBLIC_DEFAULT_TEMPERATURE
+	} from '$env/static/public';
+	import { conversations, selectedConversation } from '$lib/stores/conversation';
+	import { folders } from '$lib/stores/folder';
+	import { OpenAIModelID, OpenAIModels } from '$lib/types/openai';
 	import Icon from '@iconify/svelte';
+	import { v4 as uuidv4 } from 'uuid';
 
 	let isConfirming = false;
 
-	function localHandleClearConversations() {
-		handleClearConversations();
+	function onClearConversations(e: MouseEvent) {
+		e.stopPropagation();
+		selectedConversation.set({
+			id: uuidv4(),
+			name: 'New Conversation',
+			messages: [],
+			model: OpenAIModels[PUBLIC_DEFAULT_MODEL as OpenAIModelID],
+			prompt: PUBLIC_DEFAULT_SYSTEM_PROMPT,
+			temperature: +PUBLIC_DEFAULT_TEMPERATURE
+		});
+		conversations.set([]);
+		folders.update((folders) => folders.filter((f) => f.type !== 'chat'));
 		isConfirming = false;
 	}
 </script>
@@ -19,10 +37,7 @@
 		<div class="flex w-[40px]">
 			<button
 				class="ml-auto mr-1 minw-[20px] text-neutral-400 hover:text-neutral-100"
-				on:click={(e) => {
-					e.stopPropagation();
-					localHandleClearConversations();
-				}}
+				on:click={onClearConversations}
 			>
 				<Icon icon="tabler:check" width={18} height={18} />
 			</button>

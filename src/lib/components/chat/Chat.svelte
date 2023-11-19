@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { selectedConversation, stopConversation } from '$lib/stores/conversation';
+	import { conversations, selectedConversation, stopConversation } from '$lib/stores/conversation';
 	import Spinner from '../spinner/Spinner.svelte';
 	import { models } from '$lib/stores/models';
 	import ModelSelect from './ModelSelect.svelte';
 	import SystemPrompt from './SystemPrompt.svelte';
 	import ChatLoader from './ChatLoader.svelte';
-	import { handleUpdateConversation } from '$lib/handlers/handlers';
 	import TemperatureSlider from './TemperatureSlider.svelte';
 	import Icon from '@iconify/svelte';
 	import ChatInput from './ChatInput.svelte';
@@ -48,10 +47,10 @@
 
 	function onClearAll() {
 		if (confirm('Are you sure you want to clear all messages?') && $selectedConversation) {
-			handleUpdateConversation($selectedConversation, {
-				key: 'messages',
-				value: []
-			});
+			conversations.update((conversations) =>
+				conversations.map((c) => (c.id === $selectedConversation?.id ? { ...c, messages: [] } : c))
+			);
+			selectedConversation.set({ ...$selectedConversation, messages: [] });
 		}
 	}
 
@@ -79,25 +78,6 @@
 	let modelError: ErrorMessageType | undefined;
 
 	onMount(() => {
-		/*
-		(async () => {
-			isModelsLoading = true;
-			const resp = await fetch('/api/models');
-			if (resp.status != 200) {
-				modelError = {
-					title: 'Error fetching models.',
-					code: '' + resp.status || 'unknown',
-					messageLines: resp.statusText ? [resp.statusText] : ['OpenAI may be experiencing issues.']
-				};
-				isModelsLoading = false;
-				return;
-			}
-			const data = await resp.json();
-			models.set(data as OpenAIModel[]);
-			isModelsLoading = false;
-		})();
-		*/
-
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				autoScrollEnabled = entry.isIntersecting;

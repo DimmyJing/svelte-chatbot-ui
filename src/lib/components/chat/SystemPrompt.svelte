@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_DEFAULT_SYSTEM_PROMPT } from '$env/static/public';
-	import { handleUpdateConversation } from '$lib/handlers/handlers';
-	import { selectedConversation } from '$lib/stores/conversation';
+	import { conversations, selectedConversation } from '$lib/stores/conversation';
 	import { prompts } from '$lib/stores/prompt';
 	import type { Prompt } from '$lib/types/prompt';
 	import { onMount } from 'svelte';
@@ -79,11 +78,22 @@
 				promptInputValue = '';
 			}
 
-			if (value.length > 0)
-				handleUpdateConversation($selectedConversation, {
-					key: 'prompt',
-					value: prompt
+			if (value.length > 0) {
+				conversations.update((conversations) =>
+					conversations.map((c) =>
+						c.id === $selectedConversation?.id
+							? {
+									...c,
+									prompt: value
+							  }
+							: c
+					)
+				);
+				selectedConversation.set({
+					...$selectedConversation,
+					prompt: value
 				});
+			}
 		}
 	}
 
